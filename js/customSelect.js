@@ -187,7 +187,11 @@
 				};
 
 				// Watch for changes in the default display text
-				childScope.$watch(getDisplayText, setDisplayText);
+				childScope.$watch(getDisplayText, function(newValue, oldValue)
+					{
+						if(newValue != oldValue)
+							childScope.displayText = newValue;
+					});
 
 				childScope.$watch(function () { return elem.attr('disabled'); }, function (value) {
 					childScope.disabled = value;
@@ -225,7 +229,19 @@
 
 				function getDisplayText() {
 					options = getOptions();
-					return options.displayText;
+
+					var collection,
+						locals = {},
+						text = null,
+						key = selectElement.val();
+
+					if (key && key !== '?') {
+						collection = valuesFn(childScope) || [];
+						locals[valueName] = collection[key];
+						text = displayFn(childScope, locals);
+					}
+
+					return text || options.displayText;
 				}
 
 				function focusFirst() {
